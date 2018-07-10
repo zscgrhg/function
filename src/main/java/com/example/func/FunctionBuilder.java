@@ -6,16 +6,16 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class PredicateBuilder<T, R> implements Function<T, R> {
+public class FunctionBuilder<T, R> implements Function<T, R> {
 
     private final Function<T, R> function;
 
-    private PredicateBuilder(Function<T, R> function) {
+    private FunctionBuilder(Function<T, R> function) {
         this.function = function;
     }
 
-    private static <T, R> PredicateBuilder<T, R> with(Function<T, R> function) {
-        return new PredicateBuilder<>(function);
+    private static <T, R> FunctionBuilder<T, R> with(Function<T, R> function) {
+        return new FunctionBuilder<>(function);
     }
 
 
@@ -25,16 +25,16 @@ public class PredicateBuilder<T, R> implements Function<T, R> {
     }
 
     @Override
-    public <V> PredicateBuilder<V, R> compose(Function<? super V, ? extends T> before) {
-        return new PredicateBuilder<>(function.compose(before));
+    public <V> FunctionBuilder<V, R> compose(Function<? super V, ? extends T> before) {
+        return new FunctionBuilder<>(function.compose(before));
     }
 
     @Override
-    public <V> PredicateBuilder<T, V> andThen(Function<? super R, ? extends V> after) {
-        return new PredicateBuilder<>(function.andThen(after));
+    public <V> FunctionBuilder<T, V> andThen(Function<? super R, ? extends V> after) {
+        return new FunctionBuilder<>(function.andThen(after));
     }
 
-    public Predicate<T> build(Predicate<R> predicate) {
+    public Predicate<T> test(Predicate<R> predicate) {
         Function<? super R, Boolean> after = (R r) -> predicate.test(r);
         return function.andThen(after)::apply;
     }
@@ -49,8 +49,7 @@ public class PredicateBuilder<T, R> implements Function<T, R> {
 
         data.stream()
                 .filter(with(People::getName)
-                        .andThen(Function.identity())
-                        .build(Objects::nonNull))
+                        .test(Objects::nonNull))
                 .forEach(System.out::println);
 
     }
